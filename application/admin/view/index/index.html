@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>{$title}</title>
+    <link rel="stylesheet" href="{$Think.PUBLIC_PATH}/layui/css/layui.css">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header" style="background-color: #ffffff">
+        <div class="layui-logo" style="background-color: #434657">LinkChen的网站后台</div>
+        <div style="background-color: #000000;height: 60px;color: #ffffff;line-height: 60px;text-align: center;"><span>欢迎回来,LinkChen&nbsp;&nbsp;&nbsp;&nbsp;{$timedate}</span></div>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <li class="layui-nav-item"><a href="javascript:;" id="overviewBtn">总览</a></li>
+                <li class="layui-nav-item"><a href="javascript:;" id="articleManageBtn">文章管理</a></li>
+                <li class="layui-nav-item"><a href="javascript:;" id="menuManageBtn">菜单管理</a></li>
+            </ul>
+        </div>
+    </div>
+    <!--总览-->
+    <div class="layui-body" id="overview">
+
+    </div>
+
+    <!--文章管理-->
+    <div class="layui-body" id="articleManage">
+        <div style="padding: 15px;padding-left: 10px;">
+            <div class="layui-row">
+                <div class="layui-col-md2">
+                    <table class="layui-table" style="margin-top: 0px;width: 95%;">
+                        <tbody>
+                            <tr>
+                                <th style="padding: 0px;">
+                                    <i class="layui-icon layui-icon-search" style="position: fixed;font-size: 1.5em;margin-top: 10px;margin-left: 5px;"></i>
+                                    <input type="text" id="search"  placeholder="     请输入关键词" autocomplete="off" class="layui-input">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th onclick="javascript:location.reload();" style="padding-left: 5px;"><b class="layui-icon layui-icon-add-circle-fine" style="font-size: 1.5em;position: fixed;margin-top: 1px;"></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i style="font-size: 1.2em;">新增文章</i></th>
+                            </tr>
+                            {volist name="articles" id="article"}
+                                <tr>
+                                    <th onclick="updateArticle('{$article.id}')">{$article.title}</th>
+                                </tr>
+                            {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-col-md10">
+                    <div style="text-align: center;width: 100%;background-color: #8D8D8D;"><img id="coverImg" src="{$Think.PUBLIC_PATH}/images/cover.jpg" style="width: auto;height: 160px;" onclick="chooseImage()"></div>
+                    <textarea placeholder="请输入标题" style="width: 100%;font-size: 2.0em;border: none;padding-left: 5px;resize:none;padding-top: 20px;" id="title"></textarea>
+                    <textarea placeholder="导语（选填）" style="width: 100%;font-size: 1.2em;border: none;padding-left: 5px;resize:none;" id="introduction"></textarea>
+                    <textarea id="linkchen"></textarea>
+                    <form class="layui-form" action="" style="padding-top: 10px;">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="padding-left: 0px;width: auto;">选择文章分类</label>
+                            <div class="layui-input-block">
+                                <select name="menu" lay-filter="menu" id="menu">
+                                    {volist name="menus" id="menu"}
+                                        <!-- 文章默认类型为PHP基础 -->
+                                        {if condition="$defaultmenuid eq $menu.id"}
+                                            <option value="{$menu.id}" selected>{$menu.displayname}</option>
+                                        {else/}
+                                            <option value="{$menu.id}">{$menu.displayname}</option>
+                                        {/if}
+
+                                    {/volist}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <button class="layui-btn layui-btn-fluid" id="saveArticleBtn">文章保存</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!--菜单管理-->
+    <div class="layui-body" id="menuManage" style="padding: 10px;">
+        <table class="layui-table" lay-filter="menuTable" id="menuTable">
+        </table>
+    </div>
+
+    <div class="layui-footer">
+        ©底部固定区域
+        <input type="file" accept="image/png,image/jpeg,image/gif" name="cover" id="cover"; style="display: none;">
+    </div>
+</div>
+<script src="{$Think.PUBLIC_PATH}/layui/layui.js"></script>
+<script src="{$Think.PUBLIC_PATH}/jquery-3.3.1.min.js"></script>
+
+<script type="text/html" id="toolbar">
+    <button class="layui-btn" style="border-radius: 3px;height: 30px;font-size: 14px;line-height: 30px;" onclick="renameMenu('{{d.id}}','{{d.displayname}}')">重命名</button>
+    <button class="layui-btn" style="border-radius: 3px;height: 30px;font-size: 14px;line-height: 30px;" onclick="addMenu('{{d.id}}')">添加子菜单</button>
+</script>
+
+<script>
+    //JavaScript代码区域
+    var index;
+    var mArticleId = 0;
+    layui.use(['table','element','layedit','form'], function(){
+        var element = layui.element,
+            layedit = layui.layedit,
+            table = layui.table,
+            form = layui.form;
+        layedit.set({
+            uploadImage: {
+                url: "{:url('admin/article/saveContentImg')}",
+                type: ''
+            }
+        });
+        index = layedit.build('linkchen',{
+            height:500
+        });
+        $("#overviewBtn").click();
+        var formData = new FormData();
+        var isComplete = true;
+        $("#cover").change(function(){
+            if(this.files[0] !== undefined){
+                formData.append("cover",this.files[0]);
+                var objUrl = getObjectURL(this.files[0]) ; //获取图片的路径，该路径不是图片在本地的路径
+                $("#coverImg").attr("src",objUrl);
+            }else{
+                isComplete = false;
+            }
+        });
+
+        $("#saveArticleBtn").click(function () {
+            var title = $("#title").val();
+            var introduction = $("#introduction").val();
+            var content = layedit.getContent(index);
+            if(isEmpty(title) || isEmpty(introduction) || isEmpty(content)){
+                isComplete = false;
+            }
+            if(isComplete){
+                formData.append("title",title);
+                formData.append("introduction",introduction);
+                formData.append("content",content);
+                formData.append("menuid",$("#menu option:selected").val());
+                formData.append('articleId',mArticleId);
+                saveArticle(formData);
+            }else{
+                layer.msg("请文章内容填写完整");
+            }
+        });
+
+        $('#search').bind('keydown',function(event){
+            if(event.keyCode == "13") {
+                if(!isEmpty($('#search').val())){
+                    $.get("{:url('admin/article/searchArticle')}?keyword="+$('#search').val(), function(result){
+                        console.log(result);
+                    });
+                }
+            }
+        });
+        $("#search").bind("input propertychange",function(event){
+            console.log($("#search").val())
+            $("#search").val('     '+$("#search").val().trim());
+        });
+
+        $("#articleManage").hide();
+        $("#menuManage").hide();
+        $("#overviewBtn").click(function(){
+            $("#overview").show();
+            $("#articleManage").hide();
+            $("#menuManage").hide();
+        });
+        $("#articleManageBtn").click(function(){
+            $("#overview").hide();
+            $("#articleManage").show();
+            $("#menuManage").hide();
+        });
+        $("#menuManageBtn").click(function(){
+            $("#overview").hide();
+            $("#articleManage").hide();
+            $("#menuManage").show();
+            table.render({
+                elem: '#menuTable'
+                ,height: 'full-150'
+                ,url:"{:url('admin/menu/getMenus')}"
+                ,page: true //开启分页
+                ,limit:'20'
+                ,cols: [[ //表头
+                    {field: 'id', title: 'ID', width:80, sort: true, fixed: 'left'}
+                    ,{field: 'displayname', title: '菜单名', width:200}
+                    ,{field: 'parentName', title: '父级菜单', width:200}
+                    ,{field: 'pathStr', title: '菜单路径'}
+                    ,{align: 'center', title: '操作', width: 260,templet:'#toolbar'}
+                ]]
+            });
+        });
+    });
+
+    function chooseImage() {
+        $("#cover").trigger("click");
+    }
+
+    function getObjectURL(file) {
+        var url = null ;
+        if (window.createObjectURL!=undefined) { // basic
+            url = window.createObjectURL(file) ;
+        } else if (window.URL!=undefined) { // mozilla(firefox)
+            url = window.URL.createObjectURL(file) ;
+        } else if (window.webkitURL!=undefined) { // webkit or chrome
+            url = window.webkitURL.createObjectURL(file) ;
+        }
+        return url ;
+    }
+
+    function saveArticle(formData){
+        $.ajax({
+            url: "{:url('admin/article/saveArticle')}",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                console.log(data);
+                if (data.code == 1) {
+                    layer.msg("文章保存或更新成功!");
+                    setTimeout(function () {
+                        location.reload();
+                    },1000);
+                }
+            },
+            error: function () {
+                console.log("--->error");
+            }
+        });
+    }
+
+    function updateArticle(articleId){
+        mArticleId = articleId;
+        //设置文章内容
+        $.get("{:url('admin/article/getArticle')}?articleId="+articleId, function(result){
+            $("#coverImg").attr('src',result.data.cover);
+            $("#title").val(result.data.title);
+            $("#introduction").val(result.data.introduction);
+            $('#linkchen').html(result.data.content);
+            index = layui.layedit.build('linkchen',{
+                height:500
+            });
+            console.log(result.data.id);
+            $("#menu").val(result.data.menuid);
+            layui.form.render('select');
+        });
+    }
+
+    function renameMenu(menuid,displayname){
+        layer.open({
+            type: 1,
+            anim: 5,
+            area: ['500px', '180px'],
+            btn: ['确认保存'],
+            btn1:function(index,layero){
+                var redisplayname = $("#redisplayname").val();
+                if(isEmpty(redisplayname)){
+                    layer.closeAll();
+                }else{
+                    var formData = new FormData();
+                    formData.append('id',menuid);
+                    formData.append('displayname',redisplayname);
+                    $.ajax({
+                        url: "{:url('admin/menu/renameMenu')}",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (data) {
+                            layer.closeAll();
+                            if(data.code == 0){
+                                layer.msg("重命名失败!");
+                            }else{
+                                layer.msg("重命名成功!");
+                                setTimeout(function () {
+                                    layui.table.reload("menuTable");
+                                },1000);
+                            }
+                        },
+                        error: function () {
+                            console.log("--->error");
+                        }
+                    });
+                }
+            },
+            content: '<div class="layui-form-item" style="padding-top: 20px;">' +
+                '<label class="layui-form-label" style="width: 100px;">请输入菜单名</label>' +
+                '<div class="layui-input-block">' +
+                '<input type="text" id="redisplayname"  placeholder="'+ displayname +'" class="layui-input" style="width: 85%;">' +
+                '</div>\n' +
+                '</div>'
+        });
+    }
+
+    function addMenu(menuid){
+        layer.open({
+            type: 1,
+            anim: 5,
+            area: ['500px', '180px'],
+            btn: ['确认保存'],
+            btn1:function(index,layero){
+                var displayname = $("#displayname").val();
+                if(isEmpty(displayname)){
+                    layer.closeAll();
+                }else{
+                    var formData = new FormData();
+                    formData.append('parentid',menuid);
+                    formData.append('displayname',displayname);
+                    $.ajax({
+                        url: "{:url('admin/menu/addMenu')}",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (data) {
+                            layer.closeAll();
+                            if(data.code == 0){
+                                layer.msg("添加子菜单失败!");
+                            }else{
+                                layer.msg("添加子菜单成功!");
+                                setTimeout(function () {
+                                    layui.table.reload("menu");
+                                },1000);
+                            }
+                        },
+                        error: function () {
+                            console.log("--->error");
+                        }
+                    });
+                }
+            },
+            content: '<div class="layui-form-item" style="padding-top: 20px;">' +
+                '<label class="layui-form-label" style="width: 100px;">请输入菜单名</label>' +
+                '<div class="layui-input-block">' +
+                '<input type="text" id="displayname"  placeholder="请输入菜单名" class="layui-input" style="width: 85%;">' +
+                '</div>\n' +
+                '</div>'
+        });
+    }
+
+    function isEmpty(obj){
+        if(typeof obj == "undefined" || obj == null || obj == ""){
+            return true;
+        }else{
+            return false;
+        }
+    }
+</script>
+</body>
+</html>
