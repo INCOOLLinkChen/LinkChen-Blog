@@ -13,5 +13,5 @@ use think\Model;
 
 class IpInfo extends Model
 {
-    protected $name = 'ipInfo';
+    protected $name = 'ipinfo';
 }
