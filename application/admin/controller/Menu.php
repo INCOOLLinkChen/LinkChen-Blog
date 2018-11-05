@@ -38,4 +38,11 @@ class Menu extends ComController
     public function renameMenu(){
         return ['code'=>self::$menuModel->renameMenu(input('post.id/d'),input('post.displayname/s'))];
     }
+
+    public function getMenusByLimit(){
+        $page = input('get.page/d');
+        $limit = input('get.limit/d');
+        $list = self::$menuModel->getMenusByLimit($limit,$page - 1);
+        return ['code'=>0,'msg'=>'数据获取成功!','count'=>self::$menuModel->count(),'data'=>$list];
+    }
 }

@@ -70,4 +70,27 @@ class MenuModel extends Model {
         $data['id'] = $id;
         return $this->update($data);
     }
+
+    public function getMenusByLimit($limit,$page){
+        $list = $this->limit($page * $limit,$limit)->select();
+        foreach ($list as $k=>$v){
+            $pathStr = '/';
+            if(intval($v['parentid']) == 0){
+                $list[$k]['parentName'] = '顶级菜单';
+            }else{
+                $menu = self::get(intval($v['parentid']));
+                $list[$k]['parentName'] = $menu['displayname'];
+                $pathArr = explode('/',$v['path']);
+                $count = count($pathArr);
+                for ($i = 1;$i < $count - 1; $i++){
+                    $menu = self::get(intval($pathArr[$i]));
+                    $pathStr = $pathStr.$menu['displayname'].'/';
+                }
+                $pathStr = $pathStr.$list[$k]['displayname'];
+
+            }
+            $list[$k]['pathStr'] = $pathStr;
+        }
+        return $list;
+    }
 }

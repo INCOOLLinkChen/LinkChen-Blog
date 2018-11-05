@@ -182,17 +182,17 @@
             $("#menuManage").show();
             table.render({
                 elem: '#menuTable'
-                ,height: 'full-150'
-                ,url:"{:url('admin/menu/getMenus')}"
-                ,page: true //开启分页
-                ,limit:'20'
+                ,url:"{:url('admin/menu/getMenusByLimit')}"
                 ,cols: [[ //表头
-                    {field: 'id', title: 'ID', width:80, sort: true, fixed: 'left'}
+                    {field: 'id', title: 'ID', width:80, sort: true,align:'right'}
                     ,{field: 'displayname', title: '菜单名', width:200}
                     ,{field: 'parentName', title: '父级菜单', width:200}
                     ,{field: 'pathStr', title: '菜单路径'}
                     ,{align: 'center', title: '操作', width: 260,templet:'#toolbar'}
                 ]]
+                ,height: 'full-150'
+                ,page: true
+                ,limit:'20'
             });
         });
     });
@@ -325,7 +325,7 @@
                             }else{
                                 layer.msg("添加子菜单成功!");
                                 setTimeout(function () {
-                                    layui.table.reload("menu");
+                                    layui.table.reload("menuTable");
                                 },1000);
                             }
                         },
