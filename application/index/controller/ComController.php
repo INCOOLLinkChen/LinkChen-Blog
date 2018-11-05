@@ -1,21 +1,20 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: parallels
- * Date: 10/25/18
- * Time: 4:54 PM
+ * User: cl
+ * Date: 2018/11/1
+ * Time: 14:59
  */
 
-namespace app\admin\controller;
+namespace app\index\controller;
 
 
+use think\Controller;
 use app\admin\model\IpInfo;
 use app\admin\model\LogModel;
-use think\Controller;
 
 class ComController extends Controller
 {
-
     protected $beforeActionList = [
         'addLog',
     ];
