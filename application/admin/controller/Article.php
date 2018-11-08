@@ -58,10 +58,10 @@ class Article extends ComController{
         if($cover){
             $info = $cover->validate(['size'=>8 * 1024 * 1024,'ext'=>'jpg,png,gif'])->rule('date')->move(ROOT_PATH . 'public' . DS . 'uploads');
             if($info){
-                $data['cover'] = UPLOAD_PATH.$info->getSaveName();
+                $data['cover'] = UPLOAD_PATH.DS.$info->getSaveName();
                 $image = \think\Image::open(ROOT_PATH . 'public' . DS . 'uploads/'.$info->getSaveName());
                 $image->thumb(150, 150)->save($info->getPath().'/thumb_'.$_SERVER['REQUEST_TIME'].'.'.$image->type());
-                $data['thumbnail'] = UPLOAD_PATH.date("Ymd").'/thumb_'.$_SERVER['REQUEST_TIME'].'.'.$image->type();
+                $data['thumbnail'] = UPLOAD_PATH.DS.date("Ymd").'/thumb_'.$_SERVER['REQUEST_TIME'].'.'.$image->type();
             }
         }
         $data['addtime'] = $_SERVER['REQUEST_TIME'];
@@ -87,4 +87,5 @@ class Article extends ComController{
         return ['code'=>1,'data'=>$articleModel,'msg'=>'文章内容获取成功'];
     }
 
+    
 }

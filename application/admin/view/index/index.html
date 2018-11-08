@@ -41,7 +41,7 @@
                                 </th>
                             </tr>
                             <tr>
-                                <th onclick="javascript:location.reload();" style="padding-left: 5px;"><b class="layui-icon layui-icon-add-circle-fine" style="font-size: 1.5em;position: fixed;margin-top: 1px;"></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i style="font-size: 1.2em;">新增文章</i></th>
+                                <th onclick="addArticle()" style="padding-left: 5px;cursor:pointer;"><b class="layui-icon layui-icon-add-circle-fine" style="font-size: 1.5em;position: fixed;margin-top: 1px;"></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i style="font-size: 1.2em;">新增文章</i></th>
                             </tr>
                             {volist name="articles" id="article"}
                                 <tr>
@@ -138,6 +138,8 @@
             if(isEmpty(title) || isEmpty(introduction) || isEmpty(content)){
                 isComplete = false;
             }
+            console.log(title+"-->"+introduction+"-->"+content);
+            console.log(isComplete);
             if(isComplete){
                 formData.append("title",title);
                 formData.append("introduction",introduction);
@@ -197,6 +199,16 @@
         });
     });
 
+    function addArticle(){
+        $("#title").val('');
+        $("#introduction").val('');
+        $('#linkchen').html('');
+        index = layui.layedit.build('linkchen',{
+            height:500
+        });
+        $("#coverImg").attr("src","{$Think.PUBLIC_PATH}/images/cover.jpg");
+    }
+
     function chooseImage() {
         $("#cover").trigger("click");
     }
@@ -246,7 +258,6 @@
             index = layui.layedit.build('linkchen',{
                 height:500
             });
-            console.log(result.data.id);
             $("#menu").val(result.data.menuid);
             layui.form.render('select');
         });

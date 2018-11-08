@@ -24,16 +24,28 @@
         <div class="layui-side-scroll">
             <ul class="layui-nav layui-nav-tree"  lay-filter="test">
                 {volist name="basics" id="basic"}
-                    <li class="layui-nav-item layui-nav-itemed"><a href="javascript:;">{$basic.displayname}</a>
-                        {notempty name="$basic.parentid"}
-                        <dl class="layui-nav-child">
-                            {foreach name="basic.parentid" item='subbasic'}
-                            <dd><a href="javascript:;">{$subbasic.displayname}</a></dd>
-                            {/foreach}
-                        </dl>
-                        {/notempty}
+                    {eq name="$basic.id" value="6"}
+                        <li class="layui-nav-item layui-this"><a href="javascript:;" class="menuBtn">{$basic.displayname}</a>
+                            {notempty name="$basic.parentid"}
+                            <dl class="layui-nav-child">
+                                {foreach name="basic.parentid" item='subbasic'}
+                                <dd><a href="javascript:;">{$subbasic.displayname}</a></dd>
+                                {/foreach}
+                            </dl>
+                            {/notempty}
+                        </li>
+                    {else/}
+                        <li class="layui-nav-item"><a href="javascript:;" class="menuBtn">{$basic.displayname}</a>
+                            {notempty name="$basic.parentid"}
+                            <dl class="layui-nav-child">
+                                {foreach name="basic.parentid" item='subbasic'}
+                                <dd><a href="javascript:;">{$subbasic.displayname}</a></dd>
+                                {/foreach}
+                            </dl>
+                            {/notempty}
+                        </li>
+                    {/eq}
 
-                    </li>
                 {/volist}
             </ul>
         </div>
@@ -41,7 +53,7 @@
 
     <div class="layui-body">
         <!-- 内容主体区域 -->
-        <div style="padding: 15px;">内容主体区域</div>
+        <div style="padding: 15px;">{$content}</div>
     </div>
 
     <div class="layui-footer">
@@ -50,11 +62,11 @@
     </div>
 </div>
 <script src="{$Think.PUBLIC_PATH}/layui/layui.js"></script>
+<script src="{$Think.PUBLIC_PATH}/jquery-3.3.1.min.js"></script>
 <script>
     //JavaScript代码区域
     layui.use('element', function(){
         var element = layui.element;
-
     });
 </script>
 </body>
